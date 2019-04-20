@@ -4,14 +4,12 @@ import useDarkMode from "use-dark-mode";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { Header, Loader, Expenses, ExpenseForm } from "./components";
 import { getLightTheme, getDarkTheme } from "./utils/theme";
-import Button from "@material-ui/core/Button";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
-import Icon from "@material-ui/core/Icon";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import firebase from "firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
-
-
+import config from "./config.json";
 
 firebase.initializeApp(config);
 
@@ -25,8 +23,8 @@ const uiConfig = {
 
 function App() {
   const darkMode = useDarkMode(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState (false);
+  const [isSignedIn, setIsSignedIn] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState({});
   const [expenseList, setExpenseList] = useState([]);
   const [addExpense, setAddExpense] = useState(false);
@@ -51,16 +49,24 @@ function App() {
     });
     setAddExpense(false);
     fetchExpenses(user.email);
+    let id = await response.text();
+    console.log(id);
+  };
+
+  const signOut = () => {
+    firebase.auth.singOut().then(() => {
+      setUser({});
+      setExpenseList([]);
+      setIsSignedIn(false);
+    });
   };
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         fetchExpenses(user.email);
-        setIsSignedIn(true);
         setUser(user);
-      }
-      console.log(user);
+      } else setIsSignedIn(false);
     });
   }, []);
 
@@ -68,35 +74,37 @@ function App() {
     <MuiThemeProvider theme={darkMode.value ? getDarkTheme : getLightTheme}>
       <div className="app">
         {isLoading ? <Loader /> : null}
-        {/* {isSignedIn ? (
-          <p>Welcome! You are now signed-in!</p>
-        ) : (
+        {!isSignedIn ? (
           <StyledFirebaseAuth
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}
           />
-        )} */}
+        ) : null}
         <Header
           darkMode={darkMode}
-          displayName={
-            isSignedIn ? firebase.auth().currentUser.displayName : null
-          }
+          displayName={user.displayName}
+          logOut={isSignedIn ? () => signOut : null}
         />
-        <Fab
-          color="primary"
-          aria-label="Add"
-          className="addBtn"
-          onClick={() => setAddExpense(true)}
-        >
-          <AddIcon />
-        </Fab>
-        {/* <Button
-          variant="outlined"
-          style={{ paddingTop: "5em" }}
-          }
-        >
-          Add Expense
-        </Button> */}
+        <div className="fabBtns">
+          <Fab
+            color="secondary"
+            aria-label="Refresh"
+            className="refreshBtn"
+            onClick={() => fetchExpenses(user.email)}
+          >
+            <RefreshIcon />
+          </Fab>
+          <Fab
+            color="primary"
+            aria-label="Add"
+            className="addBtn"
+            style={{marginTop: 12}}
+            onClick={() => setAddExpense(true)}
+          >
+            <AddIcon />
+          </Fab>
+        </div>
+
         <ExpenseForm
           expand={addExpense}
           toggle={setAddExpense}

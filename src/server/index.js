@@ -4,9 +4,11 @@ var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://convergytics-challenge.firebaseio.com"
+  databaseURL: "https://convergytics-challenge.firebaseio.com",
+  storageBucket: "convergytics-challenge.appspot.com/"
 });
 var db = admin.firestore();
+var bucket = admin.storage().bucket();
 
 const app = express();
 
@@ -26,7 +28,6 @@ app.get("/api/getExpenses/:email", (req, res) => {
       snapshot.forEach(doc => {
         data.push({...doc.data(), id: doc.id})
       });
-      console.log(data);
       res.send(data);
     })
     .catch(err => {

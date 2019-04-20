@@ -13,13 +13,12 @@ code {
     monospace;
 }
 
-.app {
-  display: grid;
-  height: 100%;
+.fabBtns {
+  position: fixed;
+  top: calc(100vh - 160px);
+  left: calc(100vw - 86px);
 }
 
 .addBtn {
-  position: fixed;
-  top: calc(100vh - 112px);
-  left: calc(100vw - 112px);
+  margin-top: 12px;
 }

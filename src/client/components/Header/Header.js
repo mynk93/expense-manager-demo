@@ -18,7 +18,7 @@ const Header = props => {
             style={{ flexGrow: 1 }}
             noWrap
           >
-            Convergytics Expense Manager
+            Expense Split
           </Typography>
           <Typography color="inherit">{props.displayName}</Typography>
           <Tooltip title="Toggle light/dark theme">
