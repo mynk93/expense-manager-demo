@@ -4,7 +4,11 @@ var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert({
+    "project_id": process.env.projectId,
+    "private_key": process.env.private_key,
+    "client_email": process.env.client_email,
+  }),
   databaseURL: "https://convergytics-challenge.firebaseio.com",
   storageBucket: "convergytics-challenge.appspot.com/"
 });

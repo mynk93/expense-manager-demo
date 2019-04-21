@@ -4,4 +4,3 @@ dist
 *.log
 yarn.lock
 src/server/serviceAccountKey.json
-src/client/config.json
