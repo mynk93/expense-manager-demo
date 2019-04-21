@@ -1,7 +1,6 @@
 const express = require("express");
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./serviceAccountKey.json");
 
 if (process.env.NODE_ENV == "production") {
   admin.initializeApp({
@@ -14,6 +13,8 @@ if (process.env.NODE_ENV == "production") {
     storageBucket: "convergytics-challenge.appspot.com/"
   });
 } else {
+  
+var serviceAccount = require("./serviceAccountKey.json");
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://convergytics-challenge.firebaseio.com",
