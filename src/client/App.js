@@ -50,11 +50,10 @@ function App() {
     setAddExpense(false);
     fetchExpenses(user.email);
     let id = await response.text();
-    console.log(id);
   };
 
   const signOut = () => {
-    firebase.auth.singOut().then(() => {
+    firebase.auth().signOut().then(() => {
       setUser({});
       setExpenseList([]);
       setIsSignedIn(false);
@@ -72,46 +71,45 @@ function App() {
 
   return (
     <MuiThemeProvider theme={darkMode.value ? getDarkTheme : getLightTheme}>
+      <Header
+        darkMode={darkMode}
+        displayName={user.displayName}
+        logOut={isSignedIn ? signOut : null}
+      />
+      {isLoading ? <Loader /> : null}
+      {!isSignedIn ? (
+        <StyledFirebaseAuth
+          uiConfig={uiConfig}
+          firebaseAuth={firebase.auth()}
+        />
+      ) : null}
       <div className="app">
-        {isLoading ? <Loader /> : null}
-        {!isSignedIn ? (
-          <StyledFirebaseAuth
-            uiConfig={uiConfig}
-            firebaseAuth={firebase.auth()}
-          />
-        ) : null}
-        <Header
-          darkMode={darkMode}
-          displayName={user.displayName}
-          logOut={isSignedIn ? () => signOut : null}
-        />
-        <div className="fabBtns">
-          <Fab
-            color="secondary"
-            aria-label="Refresh"
-            className="refreshBtn"
-            onClick={() => fetchExpenses(user.email)}
-          >
-            <RefreshIcon />
-          </Fab>
-          <Fab
-            color="primary"
-            aria-label="Add"
-            className="addBtn"
-            style={{marginTop: 12}}
-            onClick={() => setAddExpense(true)}
-          >
-            <AddIcon />
-          </Fab>
-        </div>
-
-        <ExpenseForm
-          expand={addExpense}
-          toggle={setAddExpense}
-          addExpense={postAddExpense}
-        />
-        <Expenses expenseList={expenseList} />
+        <Expenses expenseList={expenseList} user={user} isLoading={setIsLoading}/>
       </div>
+      <div className="fabBtns">
+        <Fab
+          color="secondary"
+          aria-label="Refresh"
+          className="refreshBtn"
+          onClick={() => fetchExpenses(user.email)}
+        >
+          <RefreshIcon />
+        </Fab>
+        <Fab
+          color="primary"
+          aria-label="Add"
+          className="addBtn"
+          style={{ marginTop: 12 }}
+          onClick={() => setAddExpense(true)}
+        >
+          <AddIcon />
+        </Fab>
+      </div>
+      <ExpenseForm
+        expand={addExpense}
+        toggle={setAddExpense}
+        addExpense={postAddExpense}
+      />
     </MuiThemeProvider>
   );
 }
