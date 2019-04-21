@@ -17,11 +17,13 @@
     "@material-ui/icons": "^3.0.2",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.3",
+    "csvtojson": "^2.0.8",
     "express": "^4.16.4",
     "firebase": "^5.10.0",
     "firebase-admin": "^7.3.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-files": "^2.4.8",
     "react-firebaseui": "^3.1.2",
     "recharts": "^1.5.0",
     "use-dark-mode": "^2.3.1"

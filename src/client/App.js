@@ -65,7 +65,9 @@ function App() {
       if (user) {
         fetchExpenses(user.email);
         setUser(user);
-      } else setIsSignedIn(false);
+      } else {
+        setIsSignedIn(false);
+      }
     });
   }, []);
 
@@ -77,15 +79,17 @@ function App() {
         logOut={isSignedIn ? signOut : null}
       />
       {isLoading ? <Loader /> : null}
+      
+      <div className="app">
+        <Expenses expenseList={expenseList} user={user} isLoading={setIsLoading}/>
+      </div>
+      
       {!isSignedIn ? (
         <StyledFirebaseAuth
           uiConfig={uiConfig}
           firebaseAuth={firebase.auth()}
         />
       ) : null}
-      <div className="app">
-        <Expenses expenseList={expenseList} user={user} isLoading={setIsLoading}/>
-      </div>
       <div className="fabBtns">
         <Fab
           color="secondary"

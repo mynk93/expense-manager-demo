@@ -8,6 +8,14 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
+import Input from "@material-ui/core/Input";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import Chip from "@material-ui/core/Chip";
+import Files from "react-files";
+import "./ExpenseForm.css";
 
 const ExpenseForm = props => {
   const [expenseData, setExpenseData] = useState({
@@ -15,11 +23,42 @@ const ExpenseForm = props => {
     desc: "",
     amount: 0
   });
+
   const [tabValue, setTabValue] = useState(0);
+  const [empList, setEmpList] = useState([]);
+
+  const getEmployees = async () => {
+    let response = await fetch(`/api/getEmployees/`);
+    let employees = await response.json();
+    setEmpList(employees);
+  };
 
   const handleChange = name => event => {
     setExpenseData({ ...expenseData, [name]: event.target.value });
   };
+
+  const onFilesChange = files => {
+    console.log(files);
+  };
+
+  const onFilesError = (error, file) => {
+    console.log("error code " + error.code + ": " + error.message);
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250
+      }
+    }
+  };
+
+  useEffect(() => {
+    getEmployees();
+  }, []);
 
   return (
     <form noValidate autoComplete="off">
@@ -42,7 +81,7 @@ const ExpenseForm = props => {
           </Tabs>
 
           {tabValue == 0 && (
-            <React.Fragment>
+            <div className="singleExpense">
               <TextField
                 autoFocus
                 margin="dense"
@@ -53,6 +92,7 @@ const ExpenseForm = props => {
                 type="text"
                 fullWidth
               />
+              <br />
               <TextField
                 margin="dense"
                 id="desc"
@@ -62,6 +102,7 @@ const ExpenseForm = props => {
                 type="text"
                 fullWidth
               />
+              <br />
               <TextField
                 margin="dense"
                 id="date"
@@ -71,6 +112,7 @@ const ExpenseForm = props => {
                   shrink: true
                 }}
               />
+              <br />
               <TextField
                 margin="dense"
                 id="amount"
@@ -80,11 +122,46 @@ const ExpenseForm = props => {
                 type="number"
                 fullWidth
               />
+            </div>
+          )}
+          {tabValue == 1 && (
+            <React.Fragment>
+              <div className="fileUpload">
+                <Files
+                  className="filesDropzone"
+                  onChange={onFilesChange}
+                  onError={onFilesError}
+                  accepts={[".csv"]}
+                  multiple={false}
+                  maxFiles={1}
+                  maxFileSize={10000000}
+                  minFileSize={0}
+                  clickable
+                >
+                  Click to add CSV file
+                </Files>
+              </div>
+              <FormControl>
+                <InputLabel htmlFor="select-multiple">Name</InputLabel>
+                <Select
+                  multiple
+                  value={[]}
+                  // onChange={this.handleChange}
+                  input={<Input id="select-multiple" />}
+                  MenuProps={MenuProps}
+                >
+                  {empList.map(name => (
+                    <MenuItem
+                      key={name}
+                      value={name}
+                    >
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </React.Fragment>
           )}
-          {tabValue == 1 && <React.Fragment>
-            
-          </React.Fragment>}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => props.toggle(false)} color="primary">

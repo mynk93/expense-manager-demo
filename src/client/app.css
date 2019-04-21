@@ -26,3 +26,7 @@ code {
 .addBtn {
   margin-top: 12px;
 }
+
+#firebaseui_container {
+  margin-top: -36em;
+}

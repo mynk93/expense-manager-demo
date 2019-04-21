@@ -1,0 +1,13 @@
+.filesDropzone {
+  display: flex;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: ghostwhite;
+  margin-top: 12px;
+}
+
+.singleExpense {
+  width: 100%;
+}
