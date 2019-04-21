@@ -6,7 +6,7 @@ if (process.env.NODE_ENV == "production") {
   admin.initializeApp({
     credential: admin.credential.cert({
       project_id: process.env.projectId,
-      private_key: process.env.private_key.bigreplace(/\\n/g, '\n'),
+      private_key: process.env.private_key.replace(/\\n/g, '\n'),
       client_email: process.env.client_email
     }),
     databaseURL: "https://convergytics-challenge.firebaseio.com",
