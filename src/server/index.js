@@ -3,15 +3,24 @@ var admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccountKey.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    "project_id": process.env.projectId,
-    "private_key": process.env.private_key,
-    "client_email": process.env.client_email,
-  }),
-  databaseURL: "https://convergytics-challenge.firebaseio.com",
-  storageBucket: "convergytics-challenge.appspot.com/"
-});
+if (process.env.NODE_ENV == "production") {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      project_id: process.env.projectId,
+      private_key: process.env.private_key,
+      client_email: process.env.client_email
+    }),
+    databaseURL: "https://convergytics-challenge.firebaseio.com",
+    storageBucket: "convergytics-challenge.appspot.com/"
+  });
+} else {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://convergytics-challenge.firebaseio.com",
+    storageBucket: "convergytics-challenge.appspot.com/"
+  });
+}
+
 var db = admin.firestore();
 
 var bucket = admin.storage().bucket();
@@ -72,11 +81,11 @@ app.post("/api/addExpense/:email", (req, res) => {
 
 app.post("/api/updateStatus/:email", (req, res) => {
   let email = req.params.email;
-  let {action, id} = req.body;
+  let { action, id } = req.body;
   let expenseRef = db.collection(`users/${email}/expenses`).doc(id);
-  expenseRef.update({status: action}).then(() => {
+  expenseRef.update({ status: action }).then(() => {
     res.sendStatus(200);
-  })
+  });
 });
 
 app.listen(process.env.PORT || 8080, () =>
