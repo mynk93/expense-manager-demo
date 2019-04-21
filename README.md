@@ -2,7 +2,7 @@
 
 Expense Manager built with React, Node and Firebase
 
-[LIVE DEMO](convergytics-challenge.herokuapp.com)
+[LIVE DEMO](https://convergytics-challenge.herokuapp.com)
 
 Login Accounts 
 
