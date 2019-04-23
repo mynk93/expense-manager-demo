@@ -144,7 +144,6 @@ const ExpenseForm = props => {
               <FormControl>
                 <InputLabel htmlFor="select-multiple">Name</InputLabel>
                 <Select
-                  multiple
                   value={[]}
                   // onChange={this.handleChange}
                   input={<Input id="select-multiple" />}

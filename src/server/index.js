@@ -1,6 +1,7 @@
 const express = require("express");
 var admin = require("firebase-admin");
 const csvtojson = require("csvtojson");
+const readStream = require("fs");
 
 if (process.env.NODE_ENV == "production") {
   admin.initializeApp({
@@ -96,59 +97,82 @@ app.post("/api/addExpense/:email", (req, res) => {
     });
 });
 
-app.post("/api/addBulkExpense/", (req, res) => {
-  let { emailList } = req.body;
-  let csv = req.body.file;
-  let expenseList = [];
-  csvtojson({
-    noheader: true,
-    headers: ["name", "desc", "date", "status", "amount"],
-    trim: true
-  })
-    .fromFile(csv)
-    .then(jsonObj => {
-      expenseList = jsonObj;
-    });
+app.post("/api/addBulkExpense/", async (req, res) => {
+  let emailList = ["emp1@test.com", "emp2@test.com"];
+  let csv = "./src/server/expense.csv";
 
-  let userRef = db.collection("users");
-  return db
-    .runTransaction(transaction => {
-      return Promise.all(emailList.forEach(email => {
-        expenseList.forEach(expense => {
-          return transaction.get(userRef.doc(email)).then(userDoc => {
-            let newTotal =
-              parseInt(userDoc.data().total) +
-              parseInt(data.amount / emailList.length);
-            let newUnpaid =
-              parseInt(userDoc.data().unpaid) +
-              parseInt(data.amount / emailList.length);
-            transaction.update(userRef.doc(email), {
+  let csvConfig = {
+    noheader: true,
+    headers: ["name", "desc", "date", "amount"],
+    trim: true
+  };
+  const expenseList = await csvtojson(csvConfig).fromFile(csv);
+
+  try {
+    await db.runTransaction(async transaction => {
+      let userRef = db.collection("users");
+      let userDoc = (userData = []);
+      let N = emailList.length;
+
+      await Promise.all(
+        emailList.map(async email => {
+          try{
+          let userDataRef = await transaction.get(userRef.doc(email));
+          userData[email] = userDataRef.data();
+          } catch (err){
+            console.log(`inside get loop ${err}`);
+          }
+        })
+      );
+
+      await Promise.all(
+        emailList.map(email => {
+          expenseList.map(async expense => {
+            try {
+              await transaction.set(
+                userRef
+                  .doc(email)
+                  .collection("expenses")
+                  .doc(),
+                {
+                  ...expense,
+                  amount: parseInt(expense.amount / N),
+                  date: "4/20/2019",
+                  status: "pending"
+                }
+              );
+            } catch (err) {
+              console.log(`inside set loop ${err}`);
+            }
+          });
+        })
+      );
+
+      await Promise.all(
+        emailList.map(async email => {
+          let newTotal = parseInt(userData[email].total);
+          let newUnpaid = parseInt(userData[email].unpaid);
+          expenseList.map(expense => {
+            newTotal += parseInt(expense.amount / N);
+            newUnpaid += parseInt(expense.amount / N);
+          });
+          try {
+            await transaction.update(userRef.doc(email), {
               total: newTotal,
               unpaid: newUnpaid
             });
-            transaction.set(
-              userRef
-                .doc(email)
-                .collection("expenses")
-                .doc(),
-              {
-                ...expense,
-                amount: parseInt(expense.amount / emailList.length),
-                date: "4/20/2019",
-                status: "pending"
-              }
-            );
-          });
-        });
-      }));
-    })
-    .then(function() {
-      console.log("Transaction successfully committed!");
-      res.sendStatus(200);
-    })
-    .catch(function(error) {
-      console.log("Transaction failed: ", error);
+          } catch (err) {
+            console.log(`inside update loop ${err}`);
+          }
+        })
+      );
     });
+  } catch (err) {
+    console.log(`awaiting transaction ${err}`);
+    res.sendStatus(500);
+    return;
+  }
+  res.sendStatus(200);
 });
 
 app.post("/api/updateStatus/:email", (req, res) => {
