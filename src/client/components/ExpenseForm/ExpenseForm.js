@@ -10,7 +10,7 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import Chip from "@material-ui/core/Chip";
@@ -26,6 +26,9 @@ const ExpenseForm = props => {
 
   const [tabValue, setTabValue] = useState(0);
   const [empList, setEmpList] = useState([]);
+  const [empListChips, updateEmpListChips] = useState([]);
+  const [selectedEmpList, updateSelectedEmpList] = useState(new Set([]));
+  const [fileUploadText, setFileUploadText] = useState("Click to add Reciepts");
 
   const getEmployees = async () => {
     let response = await fetch(`/api/getEmployees/`);
@@ -33,16 +36,81 @@ const ExpenseForm = props => {
     setEmpList(employees);
   };
 
+  const addExpense = () => {
+    switch (tabValue) {
+      case 0:
+        props.addExpense(expenseData, "Single_Expense");
+        break;
+      case 1:
+        props.addExpense(expenseData, "Bulk_Expense");
+        break;
+    }
+  };
+
   const handleChange = name => event => {
-    setExpenseData({ ...expenseData, [name]: event.target.value });
+    switch (tabValue) {
+      case 0:
+        setExpenseData({ ...expenseData, [name]: event.target.value });
+        break;
+      case 1:
+        updateSelectedEmpList(selectedEmpList.add(event.target.value));
+        getEmpChips();
+        setExpenseData({ ...expenseData, emailList: [...selectedEmpList] });
+        break;
+    }
   };
 
   const onFilesChange = files => {
     console.log(files);
+    if (files.length == 1) setFileUploadText(`Added ${files[0].name}`);
+    else
+      setFileUploadText(
+        `Added ${files[0].name} and ${files.length - 1} others`
+      );
+    setExpenseData({ ...expenseData, file: files });
   };
 
   const onFilesError = (error, file) => {
     console.log("error code " + error.code + ": " + error.message);
+  };
+
+  const getEmpChips = () => {
+    const itr = selectedEmpList.entries();
+    let chipList = [];
+    for (let emp of itr) {
+      chipList.push(
+        <Chip key={emp[0]} label={emp[0]} onDelete={() => removeChip(emp[0])} />
+      );
+    }
+    updateEmpListChips(chipList);
+  };
+
+  const removeChip = emp => {
+    selectedEmpList.delete(emp);
+    updateSelectedEmpList(selectedEmpList);
+    getEmpChips();
+  };
+
+  const getFileUploadText = val => {
+    switch (val) {
+      case 0:
+        setFileUploadText("Click to add Reciepts");
+        break;
+      case 1:
+        setFileUploadText("Click to add CSV file");
+        break;
+    }
+  };
+
+  const clearForm = () => {
+    getFileUploadText(tabValue);
+    setExpenseData({
+      name: "",
+      desc: "",
+      amount: 0
+    });
+    updateEmpListChips([]);
+    props.toggle(false);
   };
 
   const ITEM_HEIGHT = 48;
@@ -74,7 +142,11 @@ const ExpenseForm = props => {
           <Tabs
             value={tabValue}
             variant="fullWidth"
-            onChange={(e, v) => setTabValue(v)}
+            onChange={(e, v) => {
+              setTabValue(v);
+              getFileUploadText(v);
+              getEmployees();
+            }}
           >
             <Tab label="Single Expense" />
             <Tab label="Bulk Expense" />
@@ -105,16 +177,6 @@ const ExpenseForm = props => {
               <br />
               <TextField
                 margin="dense"
-                id="date"
-                label="Date"
-                type="date"
-                InputLabelProps={{
-                  shrink: true
-                }}
-              />
-              <br />
-              <TextField
-                margin="dense"
                 id="amount"
                 label="Amount"
                 value={expenseData.amount}
@@ -122,6 +184,20 @@ const ExpenseForm = props => {
                 type="number"
                 fullWidth
               />
+              <br />
+              <Files
+                className="filesDropzone"
+                onChange={onFilesChange}
+                onError={onFilesError}
+                accepts={["image/*"]}
+                multiple={true}
+                maxFiles={3}
+                maxFileSize={10000000}
+                minFileSize={0}
+                clickable
+              >
+                {fileUploadText}
+              </Files>
             </div>
           )}
           {tabValue == 1 && (
@@ -138,35 +214,36 @@ const ExpenseForm = props => {
                   minFileSize={0}
                   clickable
                 >
-                  Click to add CSV file
+                  {fileUploadText}
                 </Files>
               </div>
-              <FormControl>
-                <InputLabel htmlFor="select-multiple">Name</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="emp-select">
+                  Add Colleagues To Expense
+                </InputLabel>
                 <Select
                   value={[]}
-                  // onChange={this.handleChange}
-                  input={<Input id="select-multiple" />}
+                  onChange={handleChange()}
+                  input={<Input id="emp-select" />}
                   MenuProps={MenuProps}
+                  autoWidth
                 >
                   {empList.map(name => (
-                    <MenuItem
-                      key={name}
-                      value={name}
-                    >
+                    <MenuItem key={name} value={name}>
                       {name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+              <div className="chipList">{empListChips}</div>
             </React.Fragment>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => props.toggle(false)} color="primary">
+          <Button onClick={() => clearForm()} color="primary">
             Cancel
           </Button>
-          <Button onClick={() => props.addExpense(expenseData)} color="primary">
+          <Button onClick={() => addExpense()} color="primary">
             Add
           </Button>
         </DialogActions>

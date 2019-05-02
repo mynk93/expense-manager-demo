@@ -13,6 +13,7 @@
   "author": "Mayank Agarwal",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^2.5.0",
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
     "babel-polyfill": "^6.26.0",
@@ -21,10 +22,15 @@
     "express": "^4.16.4",
     "firebase": "^5.10.0",
     "firebase-admin": "^7.3.0",
+    "install": "^0.12.2",
+    "material-ui-search-bar": "^1.0.0-beta.13",
+    "multer": "^1.4.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-files": "^2.4.8",
     "react-firebaseui": "^3.1.2",
+    "react-minimal-pie-chart": "^4.0.0",
+    "react-modal-image": "^2.3.2",
     "recharts": "^1.5.0",
     "use-dark-mode": "^2.3.1"
   },

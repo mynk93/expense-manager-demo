@@ -1,0 +1,30 @@
+.dashboard {
+  margin: 1em;
+  padding: 2em;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pieChart {
+  align-self: center;
+  justify-self: center;
+}
+
+.dashboardText {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+.dashboardHeading {
+  justify-self: center;
+  text-align: center;
+  align-self: center;
+}
+
+.dashboardBottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
+  text-align: center;
+  align-items: center;
+}
