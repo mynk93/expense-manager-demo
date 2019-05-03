@@ -33,6 +33,6 @@ Login Accounts
 	 
 ## Highlights
 
-* Built purely with React hooks and no classes were used.
+* Built purely with React hooks and Function Components
 * Toggle between light/dark mode with your setting remembered. 
 * Material UI principles were followed
